@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect, useRef } from "react";
 import { marked } from "marked";
-import Typed from "typed.js";
 
 import run from "../config/gemini";
 
@@ -16,35 +15,35 @@ const ContextProvider = (props) => {
 
   const delayPara = (index, nextWord) => {
     setTimeout(function () {
-        setResultData(prev=>prev+nextWord)
-    }, 25*index)
+      setResultData((prev) => prev + nextWord);
+    }, 25 * index);
   };
 
   const newChat = () => {
     setLoading(false);
     setShowResult(false);
-  }
+  };
 
-  const onSent = async (prompt) => {
+  const onSent = async (prompt, cardPrompt) => {
     setResultData("");
     setLoading(true);
     setShowResult(true);
 
     let response;
-    if (prompt !== undefined) {
-        response = await run(prompt);
-        setRecentPrompt(prompt);
-    }
-    else {
-        setPrevPrompts(prev=>[...prev,input]);
-        setRecentPrompt(input);
-        response = await run(input)
+    if (prompt !== undefined && cardPrompt === undefined) {
+      response = await run(prompt);
+      setRecentPrompt(prompt);
+    } else if (prompt === undefined && cardPrompt === undefined) {
+      setPrevPrompts((prev) => [...prev, input]);
+      setRecentPrompt(input);
+      response = await run(input);
+    } else if (prompt === undefined && cardPrompt !== undefined) {
+      setPrevPrompts((prev) => [...prev, cardPrompt]);
+      console.log(cardPrompt);
+      setRecentPrompt(cardPrompt);
+      response = await run(cardPrompt);
     }
 
-    // setRecentPrompt(input);
-    // setPrevPrompts(prev=>[...prev, input]);
-
-    //const response = await run(input);
     const markedDownResponse = marked(response, {
       breaks: true,
       smartLists: true,
@@ -55,18 +54,14 @@ const ContextProvider = (props) => {
 
     let typedResponse = markedDownResponse.split(" ");
 
-    for(let i=0; i<typedResponse.length; i++) {
-        const nextWord = typedResponse[i];
-        delayPara(i, nextWord+" ");
+    for (let i = 0; i < typedResponse.length; i++) {
+      const nextWord = typedResponse[i];
+      delayPara(i, nextWord + " ");
     }
-
-    //setResultData(markedDownContent);
 
     setLoading(false);
     setInput("");
   };
-
-  //onSent("what is react js");
 
   const contextValue = {
     prevPrompts,
