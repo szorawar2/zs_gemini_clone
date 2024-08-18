@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
-import run from "../config/gemini";
+import React, { useState, useEffect, useContext } from "react";
+import gemini from "../config/gemini";
 
 function Cardprompt(props) {
   const [resultData, setResultData] = useState("");
+
 
   useEffect(() => {
     const fetchData = async () => {
       const input = props.prompt;
 
       try {
-        const response = await run(input);
+        const response = await gemini.runCard(input);
 
         setResultData(response);
       } catch (error) {

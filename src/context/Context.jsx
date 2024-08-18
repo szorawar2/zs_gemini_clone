@@ -1,11 +1,12 @@
 import { createContext, useState, useEffect, useRef } from "react";
 import { marked } from "marked";
 
-import run from "../config/gemini";
+import gemini from "../config/gemini";
 
 export const Context = createContext();
 
 const ContextProvider = (props) => {
+  //const [history, updateHistory] = useState("");
   const [input, setInput] = useState("");
   const [recentPrompt, setRecentPrompt] = useState("");
   const [prevPrompts, setPrevPrompts] = useState([]);
@@ -24,6 +25,13 @@ const ContextProvider = (props) => {
     setShowResult(false);
   };
 
+  const historyUpdate = (p,r) => {
+    updateHistory((prev) => {
+      return (prev += `prompt: ${p}, response: ${r}`);
+      // return [...prev, {prompt:p, response:r}];
+    })
+  }
+
   const onSent = async (prompt, cardPrompt) => {
     setResultData("");
     setLoading(true);
@@ -31,17 +39,23 @@ const ContextProvider = (props) => {
 
     let response;
     if (prompt !== undefined && cardPrompt === undefined) {
-      response = await run(prompt);
+      response = await gemini.run(prompt);
       setRecentPrompt(prompt);
+      //historyUpdate(prompt, response);
+      //console.log(history);
     } else if (prompt === undefined && cardPrompt === undefined) {
       setPrevPrompts((prev) => [...prev, input]);
       setRecentPrompt(input);
-      response = await run(input);
+      response = await gemini.run(input);
+      //historyUpdate(input, response);
+      //console.log(history);
     } else if (prompt === undefined && cardPrompt !== undefined) {
       setPrevPrompts((prev) => [...prev, cardPrompt]);
       console.log(cardPrompt);
       setRecentPrompt(cardPrompt);
-      response = await run(cardPrompt);
+      response = await gemini.run(cardPrompt);
+      //historyUpdate(cardPrompt, response);
+      //console.log(history);
     }
 
     const markedDownResponse = marked(response, {
@@ -64,6 +78,7 @@ const ContextProvider = (props) => {
   };
 
   const contextValue = {
+    history,
     prevPrompts,
     setPrevPrompts,
     onSent,

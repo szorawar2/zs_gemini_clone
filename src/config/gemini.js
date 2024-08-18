@@ -1,14 +1,3 @@
-// import env from "dotenv";
-// env.config();
-
-//const apiKey = process.env.GEMINI_API_KEY
-
-/*
- * Install the Generative AI SDK
- *
- * $ npm install @google/generative-ai
- */
-
 import {
   GoogleGenerativeAI,
   HarmCategory,
@@ -30,17 +19,43 @@ const generationConfig = {
   responseMimeType: "text/plain",
 };
 
+let chatHistory = [{ role: "user", parts: [{ text: "" }] }];
+
+// safetySettings: Adjust safety settings
+// See https://ai.google.dev/gemini-api/docs/safety-settings
 async function run(prompt) {
   const chatSession = model.startChat({
     generationConfig,
-    // safetySettings: Adjust safety settings
-    // See https://ai.google.dev/gemini-api/docs/safety-settings
-    history: [],
+
+    history: chatHistory,
   });
 
-  const result = await chatSession.sendMessage(prompt);
-  console.log(result.response.text());
+  let result;
+
+  result = await chatSession.sendMessage(prompt);
+
+  chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+  chatHistory.push({
+    role: "model",
+    parts: [{ text: result.response.text() }],
+  });
+
+  console.log(chatSession._history);
+
   return result.response.text();
 }
 
-export default run;
+async function runCard(prompt) {
+  const chatSession = model.startChat({
+    generationConfig,
+    history: [],
+  });
+
+  let result;
+
+  result = await chatSession.sendMessage(prompt);
+
+  return result.response.text();
+}
+
+export default { run, runCard };
