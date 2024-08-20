@@ -6,7 +6,7 @@ import gemini from "../config/gemini";
 export const Context = createContext();
 
 const ContextProvider = (props) => {
-  //const [history, updateHistory] = useState("");
+  const [history, updateHistory] = useState([]);
   const [input, setInput] = useState("");
   const [recentPrompt, setRecentPrompt] = useState("");
   const [prevPrompts, setPrevPrompts] = useState([]);
@@ -14,23 +14,26 @@ const ContextProvider = (props) => {
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
 
-  const delayPara = (index, nextWord) => {
-    setTimeout(function () {
-      setResultData((prev) => prev + nextWord);
-    }, 25 * index);
-  };
+  // const delayPara = (index, nextWord) => {
+  //   setTimeout(function () {
+  //     setResultData((prev) => prev + nextWord);
+  //   }, 25 * index);
+  // };
 
   const newChat = () => {
     setLoading(false);
     setShowResult(false);
   };
 
-  const historyUpdate = (p,r) => {
-    updateHistory((prev) => {
-      return (prev += `prompt: ${p}, response: ${r}`);
-      // return [...prev, {prompt:p, response:r}];
-    })
-  }
+  const markDownResponse = (response) => {
+    return marked(response, {
+      breaks: true,
+      smartLists: true,
+      pedantic: true,
+      sanitizer: true,
+      smartypants: false,
+    });
+  };
 
   const onSent = async (prompt, cardPrompt) => {
     setResultData("");
@@ -38,40 +41,38 @@ const ContextProvider = (props) => {
     setShowResult(true);
 
     let response;
+    let markedResponse;
+
     if (prompt !== undefined && cardPrompt === undefined) {
       response = await gemini.run(prompt);
+      markedResponse = markDownResponse(response);
+
       setRecentPrompt(prompt);
-      //historyUpdate(prompt, response);
-      //console.log(history);
+
     } else if (prompt === undefined && cardPrompt === undefined) {
       setPrevPrompts((prev) => [...prev, input]);
       setRecentPrompt(input);
+
       response = await gemini.run(input);
-      //historyUpdate(input, response);
-      //console.log(history);
+      markedResponse = markDownResponse(response);
+
     } else if (prompt === undefined && cardPrompt !== undefined) {
       setPrevPrompts((prev) => [...prev, cardPrompt]);
-      console.log(cardPrompt);
       setRecentPrompt(cardPrompt);
+
       response = await gemini.run(cardPrompt);
-      //historyUpdate(cardPrompt, response);
-      //console.log(history);
+      markedResponse = markDownResponse(response);
+
     }
 
-    const markedDownResponse = marked(response, {
-      breaks: true,
-      smartLists: true,
-      pedantic: true,
-      sanitizer: true,
-      smartypants: false,
-    });
+    // let typedResponse = markedResponse.split(" ");
 
-    let typedResponse = markedDownResponse.split(" ");
+    // for (let i = 0; i < typedResponse.length; i++) {
+    //   const nextWord = typedResponse[i];
+    //   delayPara(i, nextWord + " ");
+    // }
 
-    for (let i = 0; i < typedResponse.length; i++) {
-      const nextWord = typedResponse[i];
-      delayPara(i, nextWord + " ");
-    }
+    setResultData(markedResponse);
 
     setLoading(false);
     setInput("");
@@ -79,6 +80,7 @@ const ContextProvider = (props) => {
 
   const contextValue = {
     history,
+    updateHistory,
     prevPrompts,
     setPrevPrompts,
     onSent,

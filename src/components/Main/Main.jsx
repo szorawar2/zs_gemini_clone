@@ -1,90 +1,93 @@
-import React, { useContext } from "react";
+import React, { useEffect, useContext, useRef } from "react";
 import "./Main.css";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/Context";
-import Cards from "./Cards";
+import Mainbottom from "./Mainbottom";
+import Navbar from "./Navbar";
+import Greet from "./Greet";
 
 const Main = () => {
-  const {
-    onSent,
-    recentPrompt,
-    showResult,
-    loading,
-    resultData,
-    setInput,
-    input,
-  } = useContext(Context);
+  const { recentPrompt, showResult, loading, resultData, history, updateHistory } =
+    useContext(Context);
 
-  const clickCard = async (prompt) => {
-    await onSent(undefined, prompt);
+  const endOfMessagesRef = useRef(null);
+
+  const historyUpdate = (p, r) => {
+    updateHistory((prev) => [...prev, { prompt: p, response: r }]);
+  };
+
+  useEffect(() => {
+    if (recentPrompt && resultData && !loading) {
+      historyUpdate(recentPrompt, resultData);
+    }
+  }, [recentPrompt, loading]);
+
+  useEffect(() => {
+    if (endOfMessagesRef.current) {
+      endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [history, loading]);
+
+  const Resultscreen = () => {
+    return (
+      <div>
+        {history.map((hist, index) => (
+          <div key={index}>
+            <Resulttitle prompt={hist.prompt} />
+            <Resultdata loadStatus={null} result={hist.response} />
+          </div>
+        ))}
+        {loading && (
+          <div ref={endOfMessagesRef}>
+            <Resulttitle prompt={recentPrompt} />
+            <Resultdata loadStatus={loading} result={resultData} />
+          </div>
+        )}
+        <div ref={endOfMessagesRef} />
+      </div>
+    );
   };
 
   return (
     <div className="main">
-      <div className="nav">
-        <p>Gemini</p>
-        <img src={assets.user_icon} alt="" />
-      </div>
       <div className="main-container">
+        <Navbar />
         <div className="main-top">
-          {!showResult ? (
-            <>
-              <div className="greet">
-                <p>
-                  <span>Hello, User.</span>
-                </p>
-                <p>How can I help you today?</p>
-              </div>
-              <Cards clickFunc={clickCard}></Cards>
-            </>
-          ) : (
-            <>
-              <div className="result">
-                <div className="result-title">
-                  <img src={assets.user_icon} alt="" />
-                  <p>{recentPrompt}</p>
-                </div>
-                <div className="result-data">
-                  <img src={assets.gemini_icon} alt="" />
-                  {loading ? (
-                    <div className="loader">
-                      <hr />
-                      <hr />
-                      <hr />
-                    </div>
-                  ) : (
-                    <p dangerouslySetInnerHTML={{ __html: resultData }}></p>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+          {!showResult ? <Greet /> : <div className="result">{Resultscreen()}</div>}
         </div>
-
-        <div className="main-bottom">
-          <div className="search-box">
-            <input
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              type="text"
-              placeholder="Enter a prompt here"
-            />
-            <div>
-              <img src={assets.gallery_icon} alt="" />
-              <img src={assets.mic_icon} alt="" />
-              {input ? (
-                <img onClick={() => onSent()} src={assets.send_icon} alt="" />
-              ) : null}
-            </div>
-          </div>
-          <p className="bottom-info">
-            Gemini may display inaccurate info, including about people, so
-            double-check its responses. Your privacy and Gemini Apps
-          </p>
-        </div>
+        <Mainbottom />
       </div>
     </div>
   );
 };
+
+function Resultdata(props) {
+  
+  return (
+    <div className="result-data">
+      <img src={assets.gemini_icon} alt="" />
+      {props.loadStatus ? <Loader /> : <p dangerouslySetInnerHTML={{ __html: props.result }}></p>}
+    </div>
+  );
+}
+
+function Resulttitle(props) {
+  return (
+    <div className="result-title">
+      <img src={assets.user_icon} alt="" />
+      <p>{props.prompt}</p>
+    </div>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="loader">
+      <hr />
+      <hr />
+      <hr />
+    </div>
+  );
+}
 
 export default Main;

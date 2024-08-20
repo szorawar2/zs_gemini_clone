@@ -40,7 +40,7 @@ async function run(prompt) {
     parts: [{ text: result.response.text() }],
   });
 
-  console.log(chatSession._history);
+  //console.log(chatSession._history);
 
   return result.response.text();
 }

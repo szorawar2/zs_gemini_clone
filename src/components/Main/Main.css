@@ -90,6 +90,7 @@
   width: 100%;
   max-width: 900px;
   padding: 0px 20px;
+  padding-top: 2px;
   margin: auto;
   background-color: white;
 }
@@ -100,8 +101,11 @@
   justify-content: space-between;
   gap: 20px;
   background-color: #f0f4f9;
-  padding: 10px 20px;
+  padding: 10px 10px;
   border-radius: 50px;
+  max-width: 80%;
+  /* margin-left: auto; */
+  margin-right: auto;
 }
 
 .search-box img {
@@ -157,6 +161,7 @@
   display: flex;
   align-items: start;
   gap: 20px;
+  padding-bottom: 50px;
 }
 
 .loader {
