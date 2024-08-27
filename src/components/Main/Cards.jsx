@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import Cardprompt from "../../context/Cardprompt";
+import Cardprompt from "./Cardprompt";
 import { assets } from "../../assets/assets";
 
 function Cards(props) {

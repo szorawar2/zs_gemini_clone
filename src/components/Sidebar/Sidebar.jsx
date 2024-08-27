@@ -1,11 +1,27 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./Sidebar.css";
 import { assets } from "../../assets/assets.js";
 import { Context } from "../../context/Context.jsx";
 
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(window.matchMedia(query).matches);
+
+  useEffect(() => {
+    const mediaQueryList = window.matchMedia(query);
+    const handleChange = (event) => setMatches(event.matches);
+
+    mediaQueryList.addEventListener('change', handleChange);
+    return () => mediaQueryList.removeEventListener('change', handleChange);
+  }, [query]);
+
+  return matches;
+};
+
 const Sidebar = () => {
-  const [extended, setExtended] = useState(false);
-  const { onSent, prevPrompts, setRecentPrompt, newChat } = useContext(Context);
+
+  const isSmallScreen = useMediaQuery('(max-width: 600px)');
+  
+  const { extended, setExtended, onSent, prevPrompts, setRecentPrompt, newChat } = useContext(Context);
 
   const loadPrompt = async (prompt) => {
     setRecentPrompt(prompt);
@@ -14,7 +30,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${extended ? 'open' : ''}`}>
       <div className="top">
         <img
           onClick={() => setExtended((prev) => !prev)}
@@ -28,7 +44,7 @@ const Sidebar = () => {
             src={assets.plus_icon}
             alt=""
           />
-          {extended ? <p>New Chat</p> : null}
+          {extended? <p>New Chat</p> : null}
         </div>
 
         {extended ? (
@@ -38,7 +54,7 @@ const Sidebar = () => {
               return (
                 <div onClick={() => loadPrompt(item)} className="recent-entry">
                   <img src={assets.message_icon} alt="" />
-                  <p>{item.slice(0, 18)}...</p>
+                  <p>{item.slice(0, (isSmallScreen? 24 : 18))}...</p>
                 </div>
               );
             })}

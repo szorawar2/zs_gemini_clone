@@ -11,6 +11,7 @@ function Mainbottom() {
     <div className="main-bottom">
       <div className="search-box">
         <input
+          onKeyDown={(e) => e.key === "Enter" ? onSent() : null}
           onChange={(e) => setInput(e.target.value)}
           value={input}
           type="text"

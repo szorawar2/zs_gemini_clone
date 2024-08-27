@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import gemini from "../config/gemini";
+import gemini from "../../config/gemini";
 
 function Cardprompt(props) {
   const [resultData, setResultData] = useState("");
