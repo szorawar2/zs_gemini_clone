@@ -5,13 +5,15 @@ import { Context } from "../../context/Context";
 
 function Mainbottom() {
 
-    const {onSent, setInput, input} = useContext(Context);
+  /* Imports context. For more details, view Context.jsx */
+  const { onSent, setInput, input } = useContext(Context);
 
+  /* Renders Main-bottom ( Search box and disclaimer ) */
   return (
     <div className="main-bottom">
       <div className="search-box">
         <input
-          onKeyDown={(e) => e.key === "Enter" ? onSent() : null}
+          onKeyDown={(e) => (e.key === "Enter" ? onSent() : null)}
           onChange={(e) => setInput(e.target.value)}
           value={input}
           type="text"
@@ -27,7 +29,10 @@ function Mainbottom() {
       </div>
       <p className="bottom-info">
         Gemini may display inaccurate info, including about people, so
-        double-check its responses. Your privacy and Gemini Apps
+        double-check its responses. Your privacy and Gemini Apps.
+      </p>
+      <p className="bottom-info">
+        This project is made as an attempt to learn website development. This app/website does not "sell" any services 
       </p>
     </div>
   );

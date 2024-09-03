@@ -19,19 +19,20 @@ const generationConfig = {
   responseMimeType: "text/plain",
 };
 
+// chat history default structure
 let chatHistory = [{ role: "user", parts: [{ text: "" }] }];
 
 // safetySettings: Adjust safety settings
 // See https://ai.google.dev/gemini-api/docs/safety-settings
+
+// Runs new/recent prompts
 async function run(prompt) {
   const chatSession = model.startChat({
     generationConfig,
-
     history: chatHistory,
   });
 
   let result;
-
   result = await chatSession.sendMessage(prompt);
 
   chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -40,11 +41,10 @@ async function run(prompt) {
     parts: [{ text: result.response.text() }],
   });
 
-  //console.log(chatSession._history);
-
   return result.response.text();
 }
 
+// Runs template prompts to provide display-result for card prompts
 async function runCard(prompt) {
   const chatSession = model.startChat({
     generationConfig,
@@ -52,10 +52,22 @@ async function runCard(prompt) {
   });
 
   let result;
-
   result = await chatSession.sendMessage(prompt);
-
   return result.response.text();
 }
 
-export default { run, runCard };
+
+// updates history accroding to state
+async function geminiHistoryUpdate(history) {
+  chatHistory = [{ role: "user", parts: [{ text: "" }] }];
+  history.forEach((element) => {
+    chatHistory.push({ role: "user", parts: [{ text: element.prompt }] });
+    chatHistory.push({
+      role: "model",
+      parts: [{ text: element.response }],
+    });
+  });
+}
+
+
+export default { run, runCard, geminiHistoryUpdate };

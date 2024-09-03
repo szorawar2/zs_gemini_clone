@@ -17,7 +17,7 @@ const Navbar = () => {
         src={assets.menu_icon}
         alt=""
       />
-      <p>Gemini</p>
+      <p>Gemini-Clone by ZS</p>
       <img src={assets.user_icon} alt="" />
     </div>
   );

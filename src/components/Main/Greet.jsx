@@ -7,8 +7,8 @@ function Greet() {
 
     const {onSent} = useContext(Context);
 
-    const clickCard = async (prompt) => {
-        await onSent(undefined, prompt);
+    const clickCard = async (cardPrompt) => {
+        await onSent(cardPrompt);
       };
 
     return (
