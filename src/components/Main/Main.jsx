@@ -1,87 +1,142 @@
-import React, { useContext } from "react";
+import React, { useEffect, useContext, useRef } from "react";
 import "./Main.css";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/Context";
-import Cards from "./Cards";
+import Mainbottom from "./Mainbottom";
+import Navbar from "./Navbar";
+import Greet from "./Greet";
 
 const Main = () => {
+
+  /* Imports context. For more details, view Context.jsx */
   const {
-    onSent,
     recentPrompt,
     showResult,
     loading,
     resultData,
-    setInput,
-    input,
+    history,
+    updateHistory,
+    updateMaster,
+    totalChats,
+    setTotalChats,
+    chatNumber,
+    setChatNumber,
   } = useContext(Context);
 
-  const clickCard = async (prompt) => {
-    await onSent(undefined, prompt);
+  /* Scrolls resultant text into view */
+  const endOfMessagesRef = useRef(null);
+  useEffect(() => {
+    if (endOfMessagesRef.current) {
+      endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [history, loading]);
+
+  /* Updates current chat history according to state */
+  useEffect(() => {
+    if (history.length && (recentPrompt !== "")) {
+      updateMaster((prevMaster) => {
+        const updatedMaster = [...prevMaster];
+
+        if (updatedMaster[chatNumber]){
+          updatedMaster[chatNumber] = history;
+          return updatedMaster;
+        }
+        else {
+          return [...prevMaster, history];
+        }
+      });
+    }
+  }, [history]);
+
+  /* Updates chat number according to state */
+  useEffect(() => {
+    if (showResult && (recentPrompt !== "")) {
+      setTotalChats((prev) => {
+        return prev + 1;
+      });
+      setChatNumber(totalChats);
+    }
+  }, [showResult]);
+
+  /* Updates the current chat history as the chat progresses */
+  useEffect(() => {
+    if (recentPrompt && !loading) {
+      updateHistory((prev) => [
+        ...prev,
+        { prompt: recentPrompt, response: resultData },
+      ]);
+    }
+  }, [recentPrompt, loading]);
+
+  /* Displays result screen and chat data */
+  const Resultscreen = () => {
+    return (
+      <div>
+        {history.map((hist, index) => (
+          <div key={index}>
+            <Resulttitle prompt={hist.prompt} />
+            <Resultdata loadStatus={null} result={hist.response} />
+          </div>
+        ))}
+        {loading && (
+          <div ref={endOfMessagesRef}>
+            <Resulttitle prompt={recentPrompt} />
+            <Resultdata loadStatus={loading} result={resultData} />
+          </div>
+        )}
+        <div ref={endOfMessagesRef} />
+      </div>
+    );
   };
 
+  /* Response data */
+  function Resultdata(props) {
+    return (
+      <div className="result-data">
+        <img src={assets.gemini_icon} alt="" />
+        {props.loadStatus ? (
+          <Loader />
+        ) : (
+          <p dangerouslySetInnerHTML={{ __html: props.result }}></p>
+        )}
+      </div>
+    );
+  }
+  
+  /* Prompt data */
+  function Resulttitle(props) {
+    return (
+      <div className="result-title">
+        <img src={assets.user_icon} alt="" />
+        <p>{props.prompt}</p>
+      </div>
+    );
+  }
+  
+  /* Loading animation*/
+  function Loader() {
+    return (
+      <div className="loader">
+        <hr />
+        <hr />
+        <hr />
+      </div>
+    );
+  }
+
+  /* Render main */
   return (
     <div className="main">
-      <div className="nav">
-        <p>Gemini</p>
-        <img src={assets.user_icon} alt="" />
-      </div>
       <div className="main-container">
+        <Navbar />
         <div className="main-top">
           {!showResult ? (
-            <>
-              <div className="greet">
-                <p>
-                  <span>Hello, User.</span>
-                </p>
-                <p>How can I help you today?</p>
-              </div>
-              <Cards clickFunc={clickCard}></Cards>
-            </>
+            <Greet />
           ) : (
-            <>
-              <div className="result">
-                <div className="result-title">
-                  <img src={assets.user_icon} alt="" />
-                  <p>{recentPrompt}</p>
-                </div>
-                <div className="result-data">
-                  <img src={assets.gemini_icon} alt="" />
-                  {loading ? (
-                    <div className="loader">
-                      <hr />
-                      <hr />
-                      <hr />
-                    </div>
-                  ) : (
-                    <p dangerouslySetInnerHTML={{ __html: resultData }}></p>
-                  )}
-                </div>
-              </div>
-            </>
+            <div className="result">{Resultscreen()}</div>
           )}
         </div>
-
-        <div className="main-bottom">
-          <div className="search-box">
-            <input
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              type="text"
-              placeholder="Enter a prompt here"
-            />
-            <div>
-              <img src={assets.gallery_icon} alt="" />
-              <img src={assets.mic_icon} alt="" />
-              {input ? (
-                <img onClick={() => onSent()} src={assets.send_icon} alt="" />
-              ) : null}
-            </div>
-          </div>
-          <p className="bottom-info">
-            Gemini may display inaccurate info, including about people, so
-            double-check its responses. Your privacy and Gemini Apps
-          </p>
-        </div>
+        <Mainbottom />
       </div>
     </div>
   );

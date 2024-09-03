@@ -1,8 +1,15 @@
-import React, { useContext } from "react";
-import Cardprompt from "../../context/Cardprompt";
+import React, { useState, useEffect, useContext } from "react";
 import { assets } from "../../assets/assets";
+import gemini from "../../config/gemini";
 
+
+/*props include: 
+1) clickFunc -> clickCard (parent)
+  Holds onSent function from Context
+ */
 function Cards(props) {
+
+  /* prompts template for cards */
   let prompt1 = Cardprompt({
     prompt:
       "make up a one line prompt, less than 10 words about travel suggestions/idea, make the prompt based on human typing, written in first person. dont include [] or 'Im stuck'",
@@ -31,6 +38,7 @@ function Cards(props) {
         <p>{prompt1}</p>
         <img src={assets.compass_icon} alt="" />
       </div>
+
       <div
         onClick={() => {
           props.clickFunc(prompt2);
@@ -63,3 +71,27 @@ function Cards(props) {
 }
 
 export default Cards;
+
+
+/* Function that runs each prompt to display on the card */
+function Cardprompt(props) {
+  const [resultData, setResultData] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const input = props.prompt;
+
+      try {
+        const response = await gemini.runCard(input);
+
+        setResultData(response);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return resultData;
+}
