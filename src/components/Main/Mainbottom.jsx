@@ -28,11 +28,7 @@ function Mainbottom() {
         </div>
       </div>
       <p className="bottom-info">
-        Gemini may display inaccurate info, including about people, so
-        double-check its responses. Your privacy and Gemini Apps.
-      </p>
-      <p className="bottom-info">
-        This project is made as an attempt to learn website development. This app/website does not "sell" any services 
+        This project is made as an attempt to learn website development. PS: dont sue me google 
       </p>
     </div>
   );

@@ -17,7 +17,7 @@ function Greet() {
           <p>
             <span>Hello, User.</span>
           </p>
-          <p>How can I help you today?</p>
+          <p>How can I assist you today?</p>
         </div>
         <Cards clickFunc={clickCard}></Cards>
       </>
